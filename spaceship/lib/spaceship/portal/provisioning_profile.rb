@@ -323,6 +323,7 @@ module Spaceship
       # @return (ProvisioningProfile) A new provisioning profile, as
       #  the repair method will generate a profile with a new ID
       def update!
+      	p "update Now"
         unless certificate_valid?
           if mac?
             if self.kind_of? Development
@@ -331,17 +332,22 @@ module Spaceship
               self.certificates = [Spaceship::Certificate::MacAppDistribution.all.first]
             end
           else
+          	p "ios"
             if self.kind_of? Development
+          		p "Development"
               self.certificates = [Spaceship::Certificate::Development.all.first]
             elsif self.kind_of? InHouse
+          		p "InHouse"
               self.certificates = [Spaceship::Certificate::InHouse.all.first]
             else
+          		p "Production"
               self.certificates = [Spaceship::Certificate::Production.all.first]
             end
           end
         end
 
         client.with_retry do
+          p "client.repair_provisioning_profile"
           client.repair_provisioning_profile!(
             id,
             name,
@@ -352,13 +358,24 @@ module Spaceship
             mac: mac?
           )
         end
-
+		p "We need to fetch the provisioning profile again, as the ID changes"
         # We need to fetch the provisioning profile again, as the ID changes
-        profile = Spaceship::ProvisioningProfile.all(mac: mac?).find do |p|
-          p.name == self.name # we can use the name as it's valid
-        end
+      	profile = Spaceship::ProvisioningProfile.all(mac: mac?).find do |p|
+        	p.name == self.name # we can use the name as it's valid
+       	end
+		p "return the Profile now"
+		p "Write the Provison profle to disk"
+		profile_name = "#{profile.name}.mobileprovision"
+        p  profile.name
+		p  "profile.id is " + profile.id
+       # p  profile
 
-        return profile
+# 		goodname = profile_name.gsub(" ", "_")
+# 		output_path = File.join(Sigh.config[:output_path], goodname)
+# 		File.open(output_path, "wb") do |f|
+# 			f.write(profile.download)
+#        end
+       return profile
       end
 
       # Is the certificate of this profile available?
