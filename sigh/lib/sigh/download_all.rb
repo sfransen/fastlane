@@ -30,7 +30,7 @@ module Sigh
 					values = profile2.app.features
 					p values
 					File.open('ProfileDetail.txt', 'a')
-					File.write('ProfileDetail.txt', "#{profile2.devices.map(&:id).length}\t#{profile2.name}\t#{profile2.app.prefix}\t{profile2.app.prefix}.#{profile2.app.bundle_id}\t#{profile2.type}\t#{profile2.distribution_method}\t", File.size('ProfileDetail.txt'), mode: 'a')
+					File.write('ProfileDetail.txt', "#{profile2.devices.map(&:id).length}\t#{profile2.name}\t#{profile2.app.prefix}\t#{profile2.app.prefix}.#{profile2.app.bundle_id}\t#{profile2.type}\t#{profile2.distribution_method}\t", File.size('ProfileDetail.txt'), mode: 'a')
 					File.write('ProfileDetail.txt', "#{profile2.app.features}\n", File.size('ProfileDetail.txt'), mode: 'a')
 
 					p "#{profile2.devices.map(&:id).length} #{profile2.name}"
