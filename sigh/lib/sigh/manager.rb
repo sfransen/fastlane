@@ -34,11 +34,18 @@ module Sigh
       DownloadAll.new.download_all
     end
 
-    def self.install_profile(profile)
-      udid = FastlaneCore::ProvisioningProfile.uuid(profile)
-      ENV["SIGH_UDID"] = udid if udid
+    def self.update_all
+      require 'sigh/download_all'
+      DownloadAll.new.update_all
+    end
 
-      FastlaneCore::ProvisioningProfile.install(profile)
+    def self.install_profile(profile)
+	  profile_name = "#{profile.name}.mobileprovision"
+      udid = FastlaneCore::ProvisioningProfile.uuid(profile)
+      goodname = profile_name.gsub(" ", "_")
+      #ENV["SIGH_UDID"] = udid if udid
+
+      FastlaneCore::ProvisioningProfile.install(goodname)
     end
   end
 end
