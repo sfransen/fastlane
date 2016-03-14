@@ -29,10 +29,10 @@ module Sigh
 					#p profile2
 					values = profile2.app.features
 					p values
-					File.open('ProfileDetail.txt', 'a')
-					File.write('ProfileDetail.txt', "#{profile2.devices.map(&:id).length}\t#{profile2.name}\t#{profile2.app.prefix}\t#{profile2.app.prefix}.#{profile2.app.bundle_id}\t#{profile2.type}\t#{profile2.distribution_method}\t", File.size('ProfileDetail.txt'), mode: 'a')
-					File.write('ProfileDetail.txt', "#{profile2.app.features}\n", File.size('ProfileDetail.txt'), mode: 'a')
-
+					hh = File.open('ProfileDetail.txt', 'a')
+					hh.write('ProfileDetail.txt', "#{profile2.devices.map(&:id).length}\t#{profile2.name}\t#{profile2.app.prefix}\t#{profile2.app.prefix}.#{profile2.app.bundle_id}\t#{profile2.type}\t#{profile2.distribution_method}\t", hh.size('ProfileDetail.txt'), mode: 'a')
+					hh.write('ProfileDetail.txt', "#{profile2.app.features}\n", hh.size('ProfileDetail.txt'), mode: 'a')
+					hh.close
 					p "#{profile2.devices.map(&:id).length} #{profile2.name}"
 					UI.message "Update profile '#{profile2.name}'"
 					update_profile(profile2)
