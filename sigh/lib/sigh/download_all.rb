@@ -24,18 +24,27 @@ module Sigh
 			deltaTotal = t4 - t3
 			minutesnow = deltaTotal / 60
 			UI.message "finished in #{minutesnow} minutes Gather the info"
-			UI.message "Add All Devices to Each Provison Profiles Now"
 				if profile2.valid?
-					#p profile2
+					UI.message "================================"
+ 					UI.message "-------------------------"
+ 					p profile2
+ 					UI.message "-------------------------"
 					values = profile2.app.features
-					p values
-					hh = File.open('ProfileDetail.txt', 'a')
-					hh.write('ProfileDetail.txt', "#{profile2.devices.map(&:id).length}\t#{profile2.name}\t#{profile2.app.prefix}\t#{profile2.app.prefix}.#{profile2.app.bundle_id}\t#{profile2.type}\t#{profile2.distribution_method}\t", hh.size('ProfileDetail.txt'), mode: 'a')
-					hh.write('ProfileDetail.txt', "#{profile2.app.features}\n", hh.size('ProfileDetail.txt'), mode: 'a')
-					hh.close
-					p "#{profile2.devices.map(&:id).length} #{profile2.name}"
+# 					p values
+ 					hh = File.open('ProfileDetail.txt', 'a')
+ 					hh.write("#{profile2.devices.map(&:id).length}\t#{profile2.name}\t#{profile2.app.prefix}\t#{profile2.app.prefix}.#{profile2.app.bundle_id}\t#{profile2.type}\t#{profile2.distribution_method}\t")
+ 					#hh.write("\t")
+					hh.write("#{profile2.app.enabled_features}\t")
+					hh.write("#{profile2.app.dev_push_enabled}\t#{profile2.app.prod_push_enabled}\t#{profile2.app.app_groups_count}\t#{profile2.app.cloud_containers_count}\t#{profile2.app.identifiers_count}\t#{profile2.app.is_wildcard}")
+					#hh.write( values )
+ 					hh.write("\n")
+# 					hh.write('ProfileDetail.txt', "#{profile2.app.features}\n", hh.size('ProfileDetail.txt'), mode: 'a')
+ 					hh.close
+# 					p "#{profile2.devices.map(&:id).length} #{profile2.name}"
+					UI.message "Add All Devices to Each Provison Profiles Now"
 					UI.message "Update profile '#{profile2.name}'"
 					update_profile(profile2)
+					UI.message "================================"
 				else
 					UI.important "Skipping invalid/expired profile '#{profile2.name}'"
 				end
@@ -94,16 +103,20 @@ module Sigh
 				UI.message "#####################"
 				UI.message "This is iTV Profiles "
 				UI.message "#####################"
-				#p	profile
+				p	profile
 				goodname = profile_name.gsub(" ", "_")
 				UI.message "Don't add Devices to this Provision Profile " + goodname
 			else
 				if profile.distribution_method.include? "store"
-					#p	profile
+					p	profile
+					goodname = profile_name.gsub(" ", "_")
+					UI.message "Don't add Devices to this Provision Profile " + goodname
+				elsif profile.distribution_method.include? "inhouse"
+					p	profile
 					goodname = profile_name.gsub(" ", "_")
 					UI.message "Don't add Devices to this Provision Profile " + goodname
 				else
-					#UI.message profile
+					UI.message profile
 					UI.important "Updating Devices in this profile to include all devices"
 					profile.devices = Spaceship.device.all_for_profile_type(profile.type)
 
@@ -116,16 +129,25 @@ module Sigh
 		def download_profile(profile)
 			FileUtils.mkdir_p(Sigh.config[:output_path])
 			profile_name = "#{profile.name}.mobileprovision"
+			goodname2 = profile_name.gsub(" ", "_")
+			goodname3 = goodname2.gsub("*", "")
+			goodname4 = goodname3.gsub("._", ".")
+			goodname5 = goodname4.gsub(":", ".")
+			goodname6 = goodname5.gsub("..", ".")
+			goodname7 = goodname6.gsub("  ", "")
+			goodname8 = goodname7.gsub(" ", "")
+			goodname9 = goodname8.gsub("._", ".")
+			goodname = goodname9.gsub("..", ".")
 
 			UI.message "#####################"
 			UI.message "profile.name is " + profile.name
+			UI.message "good profile.name is " + goodname
 			UI.message "type is " + profile.type
 			UI.message "distribution_method is " + profile.distribution_method
 			UI.message "profile.id is " + profile.id
 			UI.message "#{profile.devices.map(&:id).length} #{profile.name}"
 			UI.message "#####################"
 
-			goodname = profile_name.gsub(" ", "_")
 			UI.message "Don't add Devices to this Provision Profile " + goodname + " just Downlod"
 			output_path = File.join(Sigh.config[:output_path], goodname)
 			File.delete(output_path) if File.exist?(output_path)
@@ -133,42 +155,42 @@ module Sigh
 				f.write(profile.download)
 			end
 
-# 			if profile.type.include? "tvOS"
-# 				UI.message "#####################"
-# 				UI.message "This is iTV Profiles only download this"
-# 				UI.message "#####################"
-# 				#p	profile
-# 				p "#{profile.devices.map(&:id).length} #{profile.name}"
-# 				goodname = profile_name.gsub(" ", "_")
-# 				UI.message "Don't add Devices to this Provision Profile " + goodname + " just Downlod"
-# 				output_path = File.join(Sigh.config[:output_path], goodname)
-# 				File.open(output_path, "wb") do |f|
-# 					f.write(profile.download)
-# 				end
-# 			else
-# 				if profile.distribution_method.include? "store"
-# 					#p	profile
-# 					goodname = profile_name.gsub(" ", "_")
-# 					UI.message "Don't add Devices to this Provision Profile " + goodname + " just Downlod"
-# 					output_path = File.join(Sigh.config[:output_path], goodname)
-# 					File.open(output_path, "wb") do |f|
-# 						f.write(profile.download)
-# 					end
-# 				else
-# 					#UI.message profile
-# 					UI.important "Download the new profile with include all devices"
-# 					profile.devices = Spaceship.device.all_for_profile_type(profile.type)
-# 					p "#{profile.devices.map(&:id).length} #{profile.name}"
-#
-# 					UI.message "Saved Back to Apple"
-# 					goodname = profile_name.gsub(" ", "_")
-# 					UI.message "Download this Provision Profile " + goodname + " with all Devices now"
-# 					output_path = File.join(Sigh.config[:output_path], goodname)
-# 					File.open(output_path, "wb") do |f|
-# 						f.write(profile.download)
-# 					end
-# 				 end
-# 			end
+			if profile.type.include? "tvOS"
+				UI.message "#####################"
+				UI.message "This is iTV Profiles only download this"
+				UI.message "#####################"
+				p	profile
+				p "#{profile.devices.map(&:id).length} #{profile.name}"
+				goodname = profile_name.gsub(" ", "_")
+				UI.message "Don't add Devices to this Provision Profile " + goodname + " just Downlod"
+				output_path = File.join(Sigh.config[:output_path], goodname)
+				File.open(output_path, "wb") do |f|
+					f.write(profile.download)
+				end
+			else
+				if profile.distribution_method.include? "store"
+					p	profile
+					goodname = profile_name.gsub(" ", "_")
+					UI.message "Don't add Devices to this Provision Profile " + goodname + " just Downlod"
+					output_path = File.join(Sigh.config[:output_path], goodname)
+					File.open(output_path, "wb") do |f|
+						f.write(profile.download)
+					end
+				else
+					UI.message profile
+					UI.important "Download the new profile with include all devices"
+					profile.devices = Spaceship.device.all_for_profile_type(profile.type)
+					p "#{profile.devices.map(&:id).length} #{profile.name}"
+
+					UI.message "Saved Back to Apple"
+					goodname = profile_name.gsub(" ", "_")
+					UI.message "Download this Provision Profile " + goodname + " with all Devices now"
+					output_path = File.join(Sigh.config[:output_path], goodname)
+					File.open(output_path, "wb") do |f|
+						f.write(profile.download)
+					end
+				 end
+			end
 
 #			Manager.install_profile(output_path) unless Sigh.config[:skip_install]
 		end
@@ -176,8 +198,8 @@ module Sigh
 		def download_profile2(profile)
 			FileUtils.mkdir_p(Sigh.config[:output_path])
 			profile_name = "#{profile.class.pretty_type}_#{profile.app.bundle_id}.mobileprovision" # default name
-
-			output_path = File.join(Sigh.config[:output_path], profile_name)
+			goodname = profile_name.gsub(" ", "_")
+			output_path = File.join(Sigh.config[:output_path], goodname)
 			File.open(output_path, "wb") do |f|
 				f.write(profile.download)
 			end
